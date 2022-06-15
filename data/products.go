@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"time"
 )
@@ -18,7 +19,7 @@ type Product struct {
 	DeletedOn    string  `json:"_"`
 }
 
-func (p *Products) FromJSON(r io.Reader) error {
+func (p *Product) FromJSON(r io.Reader) error {
 	e := json.NewDecoder(r)
 	return e.Decode(p)
 }
@@ -34,6 +35,38 @@ func GetProducts() Products {
 	return productList
 }
 
+func AddProduct(p *Product) {
+	p.ID = getNextID()
+	p.CreatedOn = time.Now().UTC().String()
+	productList = append(productList, p)
+}
+
+func UpdateProduct(id int, p *Product) error {
+	pos, err := GetProductById(id)
+	if err != nil {
+		return err
+	}
+	p.ID = id
+	productList[pos] = p
+	return nil
+}
+
+var ErrProductNotFound = fmt.Errorf("Product not found")
+
+func GetProductById(id int) (int, error) {
+	for i, p := range productList {
+		if p.ID == id {
+			return i, nil
+		}
+	}
+	return -1, ErrProductNotFound
+}
+
+func getNextID() int {
+	lp := productList[len(productList)-1]
+	return lp.ID + 1
+}
+
 var productList = []*Product{
 	&Product{
 		ID:           1,
@@ -45,7 +78,7 @@ var productList = []*Product{
 		UpdatedOn:    time.Now().UTC().String(),
 	},
 	&Product{
-		ID:           1,
+		ID:           2,
 		Name:         "Esspresso",
 		Description:  "Short and strong coffee without milk",
 		ProductPrice: 140,
