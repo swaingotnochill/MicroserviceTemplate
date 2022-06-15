@@ -1,3 +1,3 @@
-module github.com/swaingotnochill/MicroserviceTemplate/product-api
+module product-api
 
 go 1.18
