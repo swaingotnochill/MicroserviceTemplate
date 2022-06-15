@@ -2,18 +2,19 @@ package main
 
 import (
 	"context"
-	"example/hello/handlers"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"product-api/handlers"
 )
 
 func main() {
 	// Dependency Injection
 	//logger
-	l := log.New(os.Stdout, "product-api:", log.LstdFlags)
+	l := log.New(os.Stdout, "Product-API:", log.LstdFlags)
 
 	ph := handlers.NewProducts(l)
 
@@ -31,6 +32,7 @@ func main() {
 
 	// Non-blocking go routine
 	go func() {
+		l.Println("Server Starting on PORT 9090")
 		err := s.ListenAndServe()
 		if err != nil {
 			l.Fatal(err)

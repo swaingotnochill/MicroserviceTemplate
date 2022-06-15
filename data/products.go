@@ -17,6 +17,12 @@ type Product struct {
 	UpdatedOn    string  `json:"_"`
 	DeletedOn    string  `json:"_"`
 }
+
+func (p *Products) FromJSON(r io.Reader) error {
+	e := json.NewDecoder(r)
+	return e.Decode(p)
+}
+
 type Products []*Product
 
 func (p *Products) ToJSON(w io.Writer) error {
