@@ -13,14 +13,12 @@ import (
 func main() {
 	// Dependency Injection
 	//logger
-	l := log.New(os.Stdout, "product-api", log.LstdFlags)
+	l := log.New(os.Stdout, "product-api:", log.LstdFlags)
 
-	hh := handlers.NewHello(l)
-	gh := handlers.NewBye(l)
+	ph := handlers.NewProducts(l)
 
 	sm := http.NewServeMux()
-	sm.Handle("/", hh)
-	sm.Handle("/bye", gh)
+	sm.Handle("/products", ph)
 
 	// Basic Server
 	s := &http.Server{
@@ -44,7 +42,7 @@ func main() {
 	signal.Notify(sigChan, os.Kill)
 
 	sig := <-sigChan
-	l.Println("Recieved Terminate, Graceful Shutdown, Signal Type: ", sig)
+	l.Println("Recieved Terminate, Graceful Shutdown. Signal Type: ", sig)
 
 	// Graceful Shutdown
 	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
