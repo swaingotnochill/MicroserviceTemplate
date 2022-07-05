@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"product-api/handlers"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -18,8 +20,23 @@ func main() {
 
 	ph := handlers.NewProducts(l)
 
-	sm := http.NewServeMux()
-	sm.Handle("/", ph)
+	sm := mux.NewRouter()
+
+	// Subrouter for handling GET requests
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/products", ph.GetProducts)
+
+	// Subrouter for handling PUT requests
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+
+	// defining id variable in the URI which can be accessed by handler using mux.vars which is a map of variables passed in the URI
+	putRouter.HandleFunc("/products/{id:[0-9]+}", ph.UpdateProducts)
+	putRouter.Use(ph.MiddleWareValidationOfProduct) // This will run before the upper Handlefunc as this is a middleware
+
+	// Subrouter for handling POST requests
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/products", ph.AddProducts)
+	postRouter.Use(ph.MiddleWareValidationOfProduct) // This will run before the upper Handlefunc as this is a middleware
 
 	// Basic Server
 	s := &http.Server{
