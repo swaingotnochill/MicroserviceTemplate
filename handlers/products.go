@@ -1,8 +1,20 @@
+// Package classification of Product API
+//
+// Documentation for Product API
+//
+//	Language: go
+//  Schemes: http
+//	BasePath: /products
+// 	Version: 1.0.0
+//
+//	Consumes:
+// 	- application/json
+//	Produces:
+//	- application/json
+//swagger:meta
 package handlers
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"product-api/data"
@@ -11,26 +23,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// KeyProduct is a context key for product
+type KeyProduct struct{}
+
+// Products handler for getting and updating products
 type Products struct {
 	l *log.Logger
+	v *data.Validation
 }
 
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+// NewProducts returns a new products handler with given logger and validation
+func NewProducts(l *log.Logger, v *data.Validation) *Products {
+	return &Products{l, v}
 }
 
-func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET products..")
-
-	// fetch data from datastore
-	lp := data.GetProducts()
-
-	// serialize the list to JSON
-	err := lp.ToJSON(rw)
-	if err != nil {
-		http.Error(rw, "Unable to Marshal JSON", http.StatusInternalServerError)
-	}
-}
 
 func (p *Products) AddProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle Post products..")
@@ -70,29 +76,3 @@ func (p *Products) UpdateProducts(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type KeyProduct struct{}
-
-func (p *Products) MiddleWareValidationOfProduct(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		prod := data.Product{} // product structure from data.product
-		err := prod.FromJSON(r.Body)
-		if err != nil {
-			http.Error(rw, "Error reading product", http.StatusBadRequest)
-			return
-		}
-
-		// validate the product before adding it to the context
-		err = prod.Validate()
-		if err != nil {
-			http.Error(rw, fmt.Sprintf("Error validating product: %s", err), http.StatusBadRequest)
-			return
-		}
-
-		// add the product to the context
-		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
-		r = r.WithContext(ctx) // create a new context with the original context as upstream
-
-		// call the next handler, which can be another middleware in the chain or the final handler.
-		next.ServeHTTP(rw, r)
-	})
-}

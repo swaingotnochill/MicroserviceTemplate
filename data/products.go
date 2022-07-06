@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"regexp"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -39,20 +38,6 @@ func (p *Product) Validate() error {
 	validate := validator.New()
 	validate.RegisterValidation("sku", SKUValidation)
 	return validate.Struct(p)
-}
-
-// Custom validation to the product structure
-func SKUValidation(fl validator.FieldLevel) bool {
-	// SKU format is abc-def-ghi
-	// This is a very basic format for validating and the regex below will work only on this format
-
-	regex := regexp.MustCompile(`[a-zA-Z]+-[a-zA-Z]+-[a-zA-Z]+`)
-	matches := regex.FindAllString(fl.Field().String(), -1)
-
-	if len(matches) != 1 {
-		return false
-	}
-	return true
 }
 
 func GetProducts() Products {
