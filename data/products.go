@@ -1,9 +1,7 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -21,17 +19,7 @@ type Product struct {
 	DeletedOn    string  `json:"_"`
 }
 
-func (p *Product) FromJSON(r io.Reader) error {
-	e := json.NewDecoder(r)
-	return e.Decode(p)
-}
-
 type Products []*Product
-
-func (p *Products) ToJSON(w io.Writer) error {
-	e := json.NewEncoder(w)
-	return e.Encode(p)
-}
 
 // Adding validation to the Product structure
 func (p *Product) Validate() error {
@@ -40,6 +28,7 @@ func (p *Product) Validate() error {
 	return validate.Struct(p)
 }
 
+// GetProducts returns all products from the database
 func GetProducts() Products {
 	return productList
 }
@@ -61,6 +50,7 @@ func UpdateProduct(id int, p *Product) error {
 }
 
 var ErrProductNotFound = fmt.Errorf("Product not found")
+
 
 func GetProductById(id int) (int, error) {
 	for i, p := range productList {

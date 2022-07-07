@@ -12,7 +12,7 @@ func (p *Products) MiddleWareValidationOfProduct(next http.Handler) http.Handler
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		prod := data.Product{} // product structure from data.product
 
-		err := prod.FromJSON(r.Body)
+		err := data.FromJSON(prod, r.Body)
 		if err != nil {
 			http.Error(rw, "[Error] reading product", http.StatusBadRequest)
 			return
